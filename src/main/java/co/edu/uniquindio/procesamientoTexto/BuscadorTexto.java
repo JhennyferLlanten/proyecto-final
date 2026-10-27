@@ -18,6 +18,14 @@ public class BuscadorTexto {
         return -1;
     }
 
+    public static String textoEnMinuscula(String texto) {
+        StringBuilder resultado = new StringBuilder();
+        for (int i = 0; i < texto.length(); i++) {
+            resultado.append(aMinuscula(texto.charAt(i)));
+        }
+        return resultado.toString();
+    }
+
     public static char aMinuscula(char c) {
         if (c >= 'A' && c <= 'Z') {
             return (char) (c + 32);
