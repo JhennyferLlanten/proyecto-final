@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Análisis de algoritmos - Bibliometría</title>
+</head>
+<body>
+<h1>Análisis de algoritmos en el contexto de la bibliometría</h1>
+<p>Corpus: 20 artículos sobre inteligencia artificial generativa.</p>
+
+<h2>Requerimientos</h2>
+<ul>
+    <li>Similitud textual (próximamente)</li>
+    <li>Clustering jerárquico (próximamente)</li>
+    <li>Búsqueda de patrones (próximamente)</li>
+</ul>
+
+<h2>Artículos</h2>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Número</th>
+        <th>Título</th>
+    </tr>
+    <tr th:each="articulo : ${articulos}">
+        <td th:text="${articulo.numero}">1</td>
+        <td th:text="${articulo.titulo}">Título</td>
+    </tr>
+</table>
+</body>
+</html>
