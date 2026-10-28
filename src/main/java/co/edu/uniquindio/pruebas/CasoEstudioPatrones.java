@@ -4,6 +4,7 @@ import co.edu.uniquindio.modelo.Articulo;
 import co.edu.uniquindio.modelo.LectorDatos;
 import co.edu.uniquindio.patrones.BoyerMoore;
 import co.edu.uniquindio.patrones.KMP;
+import co.edu.uniquindio.patrones.RabinKarp;
 import co.edu.uniquindio.procesamientoTexto.BuscadorTexto;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ public class CasoEstudioPatrones {
 
         mostrarKMP(texto, patron);
         mostrarBoyerMoore(texto, patron);
+        mostrarRabinKarp(texto, patron);
     }
 
     private static void mostrarKMP(String texto, String patron) {
@@ -104,5 +106,56 @@ public class CasoEstudioPatrones {
             iteracion++;
         }
         System.out.println("Comparaciones: " + comparaciones);
+    }
+
+    private static void mostrarRabinKarp(String texto, String patron) {
+        System.out.println();
+        System.out.println("===== RABIN-KARP (base " + RabinKarp.BASE + ", primo " + RabinKarp.PRIMO + ") =====");
+        int n = texto.length();
+        int m = patron.length();
+
+        System.out.println("Hash del patron, letra por letra: hash = (" + RabinKarp.BASE + " * hash + codigo) % " + RabinKarp.PRIMO);
+        long hashPatron = 0;
+        for (int i = 0; i < m; i++) {
+            long anterior = hashPatron;
+            hashPatron = (RabinKarp.BASE * hashPatron + patron.charAt(i)) % RabinKarp.PRIMO;
+            System.out.println("  '" + patron.charAt(i) + "' (codigo " + (int) patron.charAt(i) + "): (" + RabinKarp.BASE + " * " + anterior + " + " + (int) patron.charAt(i) + ") % " + RabinKarp.PRIMO + " = " + hashPatron);
+        }
+        long potencia = RabinKarp.calcularPotencia(m);
+        System.out.println("Potencia = " + RabinKarp.BASE + "^" + (m - 1) + " % " + RabinKarp.PRIMO + " = " + potencia);
+
+        System.out.println("Ventanas (las 5 primeras y todas donde el hash coincide):");
+        long hashVentana = RabinKarp.calcularHash(texto, m);
+        int colisiones = 0;
+        for (int s = 0; s <= n - m; s++) {
+            String ventana = texto.substring(s, s + m);
+            if (hashVentana == hashPatron) {
+                boolean iguales = true;
+                for (int j = 0; j < m; j++) {
+                    if (texto.charAt(s + j) != patron.charAt(j)) {
+                        iguales = false;
+                    }
+                }
+                if (iguales) {
+                    System.out.println("  s = " + s + "  [" + ventana + "]  hash = " + hashVentana + "  hash igual y letras iguales: COINCIDENCIA");
+                } else {
+                    colisiones++;
+                    System.out.println("  s = " + s + "  [" + ventana + "]  hash = " + hashVentana + "  hash igual pero letras distintas: COLISION");
+                }
+            } else if (s < 5) {
+                System.out.println("  s = " + s + "  [" + ventana + "]  hash = " + hashVentana + "  distinto de " + hashPatron + ", no se comparan letras");
+            }
+            if (s < n - m) {
+                long siguiente = (RabinKarp.BASE * (hashVentana - texto.charAt(s) * potencia) + texto.charAt(s + m)) % RabinKarp.PRIMO;
+                if (siguiente < 0) {
+                    siguiente = siguiente + RabinKarp.PRIMO;
+                }
+                if (s < 4) {
+                    System.out.println("      siguiente = (" + RabinKarp.BASE + " * (" + hashVentana + " - " + (int) texto.charAt(s) + " * " + potencia + ") + " + (int) texto.charAt(s + m) + ") % " + RabinKarp.PRIMO + " = " + siguiente);
+                }
+                hashVentana = siguiente;
+            }
+        }
+        System.out.println("Colisiones: " + colisiones);
     }
 }
