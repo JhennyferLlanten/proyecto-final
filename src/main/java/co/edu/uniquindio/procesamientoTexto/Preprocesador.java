@@ -26,4 +26,28 @@ public class Preprocesador {
         }
         actual.setLength(0);                                    //vacia la palabra para empezar otra
     }
+
+    public static ArrayList<String> obtenerPalabrasCompletas(String texto) {
+        ArrayList<String> palabras = new ArrayList<>();
+        StringBuilder actual = new StringBuilder();
+
+        for (int i = 0; i < texto.length(); i++) {
+            char c = BuscadorTexto.aMinuscula(texto.charAt(i));
+            if (c >= 'a' && c <= 'z') {
+                actual.append(c);                                                   //arma la palabra
+            } else {
+                guardarPalabraCompleta(actual, palabras);                           //termina y guarda la palabra
+            }
+        }
+        guardarPalabraCompleta(actual, palabras);                                   //ultima palabra de la linea
+        return palabras;
+    }
+
+    private static void guardarPalabraCompleta(StringBuilder actual, ArrayList<String> palabras) {
+        if (actual.length() > 0) {
+            palabras.add(actual.toString());
+        }
+        actual.setLength(0);
+    }
+
 }

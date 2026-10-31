@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Similitud textual</title>
+</head>
+<body>
+<p><a href="/">Inicio</a></p>
+<h1>Similitud textual</h1>
+<p>Selecciona dos o más artículos y compara sus abstracts por pares con cuatro algoritmos clásicos. Cada uno da un valor entre 0 y 1 (1 = iguales). Se usan las palabras del abstract sin palabras vacías.</p>
+
+<form action="/similitud" method="get">
+    <p th:each="articulo : ${articulos}">
+        <label>
+            <input type="checkbox" name="articulos" th:value="${articulo.numero}"
+                   th:checked="${seleccionados != null and seleccionados.contains(articulo.numero)}">
+            <span th:text="${articulo.numero + ' - ' + articulo.titulo}"></span>
+        </label>
+    </p>
+    <button type="submit">Comparar</button>
+</form>
+
+<p th:if="${mensaje != null}" th:text="${mensaje}"></p>
+
+<div th:if="${comparacion != null}">
+    <h2>Similitud por pares</h2>
+    <p>Los cuatro algoritmos comparan dos textos a la vez. Por eso la aplicación compara todas las parejas posibles de los artículos seleccionados (con n artículos son n · (n − 1) / 2 parejas) y luego reúne los resultados en esta tabla. Cada fila es una pareja y cada columna es un algoritmo. El valor va de 0 (nada parecidos) a 1 (idénticos).</p>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Artículo A</th>
+            <th>Artículo B</th>
+            <th>Jaccard</th>
+            <th>Coseno con TF-IDF</th>
+            <th>Levenshtein por palabras</th>
+            <th>Needleman-Wunsch por palabras</th>
+        </tr>
+        <tr th:each="fila : ${comparacion.filas}">
+            <td th:text="${fila.numeroA}"></td>
+            <td th:text="${fila.numeroB}"></td>
+            <td th:text="${#numbers.formatDecimal(fila.jaccard, 1, 4)}"></td>
+            <td th:text="${#numbers.formatDecimal(fila.coseno, 1, 4)}"></td>
+            <td th:text="${#numbers.formatDecimal(fila.levenshtein, 1, 4)}"></td>
+            <td th:text="${#numbers.formatDecimal(fila.needlemanWunsch, 1, 4)}"></td>
+        </tr>
+    </table>
+
+    <h2>Tiempos (suma de todos los pares)</h2>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Algoritmo</th>
+            <th>Preprocesamiento (ms)</th>
+            <th>Cálculo (ms)</th>
+        </tr>
+        <tr th:each="total : ${comparacion.totales}">
+            <td th:text="${total.nombre}"></td>
+            <td th:text="${#numbers.formatDecimal(total.milisegundosPreprocesamiento, 1, 4)}"></td>
+            <td th:text="${#numbers.formatDecimal(total.milisegundosCalculo, 1, 4)}"></td>
+        </tr>
+    </table>
+</div>
+
+<h2>Matriz de similitud (coseno con TF-IDF)</h2>
+<table border="1" cellpadding="3">
+    <tr>
+        <th></th>
+        <th th:each="articulo : ${articulos}" th:text="${articulo.numero}"></th>
+    </tr>
+    <tr th:each="fila, estado : ${matriz}">
+        <th th:text="${articulos[estado.index].numero}"></th>
+        <td th:each="valor : ${fila}" th:text="${#numbers.formatDecimal(valor, 1, 4)}"></td>
+    </tr>
+</table>
+</body>
+</html>
