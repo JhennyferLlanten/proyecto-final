@@ -5,10 +5,12 @@ import co.edu.uniquindio.modelo.LectorDatos;
 import co.edu.uniquindio.procesamientoTexto.BuscadorTexto;
 import co.edu.uniquindio.procesamientoTexto.Preprocesador;
 import co.edu.uniquindio.similitud.CosenoTfIdf;
+import co.edu.uniquindio.similitud.DistanciaEuclidiana;
 import co.edu.uniquindio.similitud.EjecutorSimilitud;
 import co.edu.uniquindio.similitud.Jaccard;
 import co.edu.uniquindio.similitud.Levenshtein;
 import co.edu.uniquindio.similitud.ModeloTfIdf;
+import co.edu.uniquindio.similitud.ModeloWord2Vec;
 import co.edu.uniquindio.similitud.NeedlemanWunsch;
 import co.edu.uniquindio.similitud.Vocabulario;
 
@@ -33,6 +35,9 @@ public class CasoEstudioSimilitud {
         double coseno = mostrarCoseno(articulos, a, b);
         double levenshtein = mostrarLevenshtein(a, b);
         double needlemanWunsch = mostrarNeedlemanWunsch(a, b);
+        ModeloWord2Vec modeloWord2Vec = new ModeloWord2Vec(listaDe(a, b));
+        double word2vec = mostrarWord2Vec(a, b, modeloWord2Vec);
+        double word2vecEuclidiana = mostrarWord2VecEuclidiana(modeloWord2Vec);
 
         System.out.println();
         System.out.println("===== RESUMEN =====");
@@ -40,11 +45,18 @@ public class CasoEstudioSimilitud {
         System.out.println("Coseno TF-IDF    = " + formato(coseno));
         System.out.println("Levenshtein      = " + formato(levenshtein));
         System.out.println("Needleman-Wunsch = " + formato(needlemanWunsch));
+        System.out.println("Word2Vec coseno  = " + formato(word2vec));
+        System.out.println("Word2Vec euclid. = " + formato(word2vecEuclidiana));
     }
 
     private static String primeraFrase(String resumen) {
         int fin = BuscadorTexto.buscarPatron(resumen, ". ", 0);
         return resumen.substring(0, fin + 1);
+    }
+
+    private static void mostrarAngulo(double coseno) {
+        double angulo = Math.toDegrees(Math.acos(coseno));
+        System.out.println("Angulo = arccos(" + formato(coseno) + ") = " + String.format("%.2f", angulo) + " grados");
     }
 
     private static String formato(double valor) {
@@ -103,6 +115,7 @@ public class CasoEstudioSimilitud {
         System.out.println("Norma A = " + formato(Math.sqrt(sumaU)) + "   Norma B = " + formato(Math.sqrt(sumaV)));
         double similitud = CosenoTfIdf.calcularCoseno(u, v);
         System.out.println("Coseno = " + formato(productoPunto) + " / (" + formato(Math.sqrt(sumaU)) + " * " + formato(Math.sqrt(sumaV)) + ") = " + formato(similitud));
+        mostrarAngulo(similitud);
         return similitud;
     }
 
@@ -161,6 +174,71 @@ public class CasoEstudioSimilitud {
         int distancia = tabla[a.size()][b.size()];
         double similitud = Levenshtein.calcularSimilitud(distancia, a.size(), b.size());
         System.out.println("Distancia = " + distancia + ", similitud = 1 - " + distancia + " / " + Math.max(a.size(), b.size()) + " = " + formato(similitud));
+        return similitud;
+    }
+
+    private static void mostrarPalabrasSinVector(String nombre, ArrayList<String> palabras, ModeloWord2Vec modelo) {
+        ArrayList<String> sinVector = new ArrayList<>();
+        for (int i = 0; i < palabras.size(); i++) {
+            if (Vocabulario.posicion(modelo.vocabulario, palabras.get(i)) == -1) {
+                sinVector.add(palabras.get(i));
+            }
+        }
+        System.out.println("Texto " + nombre + ": " + (palabras.size() - sinVector.size()) + " de " + palabras.size() + " palabras tienen vector. Sin vector: " + sinVector);
+    }
+
+    private static void mostrarPrimerasPosiciones(String nombre, double[] vector) {
+        StringBuilder texto = new StringBuilder("Promedio " + nombre + " (primeras 5 de " + vector.length + " posiciones):");
+        for (int k = 0; k < 5; k++) {
+            texto.append(String.format("  %.4f", vector[k]));
+        }
+        System.out.println(texto);
+    }
+
+    private static double mostrarWord2Vec(ArrayList<String> a, ArrayList<String> b, ModeloWord2Vec modelo) {
+        System.out.println();
+        System.out.println("===== WORD2VEC (PROMEDIO Y COSENO) =====");
+        System.out.println("El modelo tiene un vector de " + ModeloWord2Vec.DIMENSION + " numeros por cada una de las " + modelo.vocabulario.size() + " palabras del corpus que Word2Vec conoce");
+        mostrarPalabrasSinVector("A", a, modelo);
+        mostrarPalabrasSinVector("B", b, modelo);
+        double[] u = modelo.vectores[0];
+        double[] v = modelo.vectores[1];
+        mostrarPrimerasPosiciones("A", u);
+        mostrarPrimerasPosiciones("B", v);
+        double productoPunto = 0;
+        double sumaU = 0;
+        double sumaV = 0;
+        for (int k = 0; k < u.length; k++) {
+            productoPunto = productoPunto + u[k] * v[k];
+            sumaU = sumaU + u[k] * u[k];
+            sumaV = sumaV + v[k] * v[k];
+        }
+        System.out.println("Producto punto = " + formato(productoPunto));
+        System.out.println("Norma A = " + formato(Math.sqrt(sumaU)) + "   Norma B = " + formato(Math.sqrt(sumaV)));
+        double similitud = CosenoTfIdf.calcularCoseno(u, v);
+        System.out.println("Coseno = " + formato(productoPunto) + " / (" + formato(Math.sqrt(sumaU)) + " * " + formato(Math.sqrt(sumaV)) + ") = " + formato(similitud));
+        mostrarAngulo(similitud);
+        return similitud;
+    }
+
+    private static double mostrarWord2VecEuclidiana(ModeloWord2Vec modelo) {
+        System.out.println();
+        System.out.println("===== WORD2VEC (PROMEDIO Y DISTANCIA EUCLIDIANA) =====");
+        double[] u = modelo.vectores[0];
+        double[] v = modelo.vectores[1];
+        double suma = 0;
+        for (int k = 0; k < 3; k++) {
+            double diferencia = u[k] - v[k];
+            System.out.println("Posicion " + (k + 1) + ": (" + formato(u[k]) + " - " + formato(v[k]) + ")^2 = " + formato(diferencia * diferencia));
+        }
+        for (int k = 0; k < u.length; k++) {
+            suma = suma + (u[k] - v[k]) * (u[k] - v[k]);
+        }
+        double distancia = DistanciaEuclidiana.calcularDistancia(u, v);
+        double similitud = DistanciaEuclidiana.calcularSimilitud(distancia);
+        System.out.println("Suma de las " + u.length + " posiciones = " + formato(suma));
+        System.out.println("Distancia = raiz de " + formato(suma) + " = " + formato(distancia));
+        System.out.println("Similitud = 1 / (1 + " + formato(distancia) + ") = " + formato(similitud));
         return similitud;
     }
 

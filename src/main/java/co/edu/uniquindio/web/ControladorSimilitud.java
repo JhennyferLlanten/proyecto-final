@@ -5,6 +5,7 @@ import co.edu.uniquindio.modelo.LectorDatos;
 import co.edu.uniquindio.similitud.ComparacionSeleccion;
 import co.edu.uniquindio.similitud.EjecutorSimilitud;
 import co.edu.uniquindio.similitud.ModeloTfIdf;
+import co.edu.uniquindio.similitud.ModeloWord2Vec;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ public class ControladorSimilitud {
         Articulo[] articulos = LectorDatos.leerArticulos();
         ArrayList<ArrayList<String>> palabras = EjecutorSimilitud.obtenerPalabras(articulos);
         ModeloTfIdf modeloTfIdf = new ModeloTfIdf(palabras);
+        ModeloWord2Vec modeloWord2Vec = new ModeloWord2Vec(palabras);
 
         modelo.addAttribute("articulos", articulos);
         modelo.addAttribute("seleccionados", seleccionados);
@@ -39,7 +41,7 @@ public class ControladorSimilitud {
             if (posiciones.size() < 2) {
                 modelo.addAttribute("mensaje", "Selecciona al menos dos artículos.");
             } else {
-                ComparacionSeleccion comparacion = EjecutorSimilitud.compararSeleccion(articulos, palabras, modeloTfIdf, posiciones);
+                ComparacionSeleccion comparacion = EjecutorSimilitud.compararSeleccion(articulos, palabras, modeloTfIdf, modeloWord2Vec, posiciones);
                 modelo.addAttribute("comparacion", comparacion);
             }
         }

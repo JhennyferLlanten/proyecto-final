@@ -35,3 +35,6 @@ build/
 .DS_Store
 ### Articulos del corpus (PDF con derechos de autor, no se suben) ###
 articulosProyecto/
+
+### Vectores de Word2Vec (archivos de 2 GB, no se suben) ###
+modeloIA/

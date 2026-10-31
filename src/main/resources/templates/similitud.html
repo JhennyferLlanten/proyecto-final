@@ -7,7 +7,7 @@
 <body>
 <p><a href="/">Inicio</a></p>
 <h1>Similitud textual</h1>
-<p>Selecciona dos o más artículos y compara sus abstracts por pares con cuatro algoritmos clásicos. Cada uno da un valor entre 0 y 1 (1 = iguales). Se usan las palabras del abstract sin palabras vacías.</p>
+<p>Selecciona dos o más artículos y compara sus abstracts por pares con cuatro algoritmos clásicos y uno basado en inteligencia artificial (Word2Vec, con coseno y con distancia euclidiana). Cada uno da un valor entre 0 y 1 (1 = iguales). Todos usan todas las palabras del abstract, sin quitar palabras vacías.</p>
 
 <form action="/similitud" method="get">
     <p th:each="articulo : ${articulos}">
@@ -24,7 +24,8 @@
 
 <div th:if="${comparacion != null}">
     <h2>Similitud por pares</h2>
-    <p>Los cuatro algoritmos comparan dos textos a la vez. Por eso la aplicación compara todas las parejas posibles de los artículos seleccionados (con n artículos son n · (n − 1) / 2 parejas) y luego reúne los resultados en esta tabla. Cada fila es una pareja y cada columna es un algoritmo. El valor va de 0 (nada parecidos) a 1 (idénticos).</p>
+    <p>Los algoritmos comparan dos textos a la vez. Por eso la aplicación compara todas las parejas posibles de los artículos seleccionados y luego reúne los resultados en una tabla.</p>
+    <p>Cada fila es una pareja y cada columna es un algoritmo o una métrica. El valor va de 0 (nada parecidos) a 1 (idénticos).</p>
     <table border="1" cellpadding="5">
         <tr>
             <th>Artículo A</th>
@@ -33,6 +34,8 @@
             <th>Coseno con TF-IDF</th>
             <th>Levenshtein por palabras</th>
             <th>Needleman-Wunsch por palabras</th>
+            <th>Word2Vec (coseno)</th>
+            <th>Word2Vec (distancia euclidiana)</th>
         </tr>
         <tr th:each="fila : ${comparacion.filas}">
             <td th:text="${fila.numeroA}"></td>
@@ -41,6 +44,8 @@
             <td th:text="${#numbers.formatDecimal(fila.coseno, 1, 4)}"></td>
             <td th:text="${#numbers.formatDecimal(fila.levenshtein, 1, 4)}"></td>
             <td th:text="${#numbers.formatDecimal(fila.needlemanWunsch, 1, 4)}"></td>
+            <td th:text="${#numbers.formatDecimal(fila.word2vec, 1, 4)}"></td>
+            <td th:text="${#numbers.formatDecimal(fila.word2vecEuclidiana, 1, 4)}"></td>
         </tr>
     </table>
 

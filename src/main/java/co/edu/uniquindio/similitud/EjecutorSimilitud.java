@@ -16,8 +16,8 @@ public class EjecutorSimilitud {
     }
 
     public static ComparacionSeleccion compararSeleccion(Articulo[] articulos, ArrayList<ArrayList<String>> palabras,
-                                                         ModeloTfIdf modelo, ArrayList<Integer> posiciones) {
-        ComparacionSeleccion comparacion = new ComparacionSeleccion(modelo.milisegundos);
+                                                         ModeloTfIdf modelo, ModeloWord2Vec modeloWord2Vec, ArrayList<Integer> posiciones) {
+        ComparacionSeleccion comparacion = new ComparacionSeleccion(modelo.milisegundos, modeloWord2Vec.milisegundos);
         for (int i = 0; i < posiciones.size(); i++) {
             for (int j = i + 1; j < posiciones.size(); j++) {
                 int posicionA = posiciones.get(i);
@@ -28,9 +28,11 @@ public class EjecutorSimilitud {
                 ResultadoSimilitud coseno = ejecutarCoseno(modelo, posicionA, posicionB);
                 ResultadoSimilitud levenshtein = ejecutarLevenshtein(a, b);
                 ResultadoSimilitud needlemanWunsch = ejecutarNeedlemanWunsch(a, b);
+                ResultadoSimilitud word2vec = ejecutarWord2Vec(modeloWord2Vec, posicionA, posicionB);
+                ResultadoSimilitud word2vecEuclidiana = ejecutarWord2VecEuclidiana(modeloWord2Vec, posicionA, posicionB);
                 FilaSimilitud fila = new FilaSimilitud(articulos[posicionA].numero, articulos[posicionB].numero,
-                        jaccard.similitud, coseno.similitud, levenshtein.similitud, needlemanWunsch.similitud);
-                comparacion.agregar(fila, jaccard, coseno, levenshtein, needlemanWunsch);
+                        jaccard.similitud, coseno.similitud, levenshtein.similitud, needlemanWunsch.similitud, word2vec.similitud, word2vecEuclidiana.similitud);
+                comparacion.agregar(fila, jaccard, coseno, levenshtein, needlemanWunsch, word2vec, word2vecEuclidiana);
             }
         }
         return comparacion;
@@ -66,6 +68,33 @@ public class EjecutorSimilitud {
         resultado.milisegundosCalculo = (fin - inicio) / 1000000.0;
 
         resultado.detalle = "vectores de " + modelo.vocabulario.size() + " palabras del corpus";
+        return resultado;
+    }
+
+    public static ResultadoSimilitud ejecutarWord2Vec(ModeloWord2Vec modelo, int posicionA, int posicionB) {
+        ResultadoSimilitud resultado = new ResultadoSimilitud("Word2Vec (coseno)");
+        resultado.milisegundosPreprocesamiento = modelo.milisegundos;
+
+        long inicio = System.nanoTime();
+        resultado.similitud = CosenoTfIdf.calcularCoseno(modelo.vectores[posicionA], modelo.vectores[posicionB]);
+        long fin = System.nanoTime();
+        resultado.milisegundosCalculo = (fin - inicio) / 1000000.0;
+
+        resultado.detalle = "vectores promedio de " + ModeloWord2Vec.DIMENSION + " dimensiones";
+        return resultado;
+    }
+
+    public static ResultadoSimilitud ejecutarWord2VecEuclidiana(ModeloWord2Vec modelo, int posicionA, int posicionB) {
+        ResultadoSimilitud resultado = new ResultadoSimilitud("Word2Vec (distancia euclidiana)");
+        resultado.milisegundosPreprocesamiento = modelo.milisegundos;
+
+        long inicio = System.nanoTime();
+        double distancia = DistanciaEuclidiana.calcularDistancia(modelo.vectores[posicionA], modelo.vectores[posicionB]);
+        resultado.similitud = DistanciaEuclidiana.calcularSimilitud(distancia);
+        long fin = System.nanoTime();
+        resultado.milisegundosCalculo = (fin - inicio) / 1000000.0;
+
+        resultado.detalle = "distancia euclidiana = " + distancia;
         return resultado;
     }
 
