@@ -10,9 +10,13 @@
 <nav th:replace="~{fragmentos :: barra('clustering')}"></nav>
 <main>
 <h1>Clustering jerárquico</h1>
-<p>Los 20 artículos se agrupan con tres criterios de vinculación (Single, Complete y Average).</p>
-<p>Cada árbol se corta en 2, 3, 4, 5 y 6 grupos y se mide la silueta de cada corte.</p>
-<p>Cada criterio se queda con su mejor silueta y gana el criterio cuya mejor silueta sea la más alta.</p>
+<p>Los 20 artículos se agrupan con tres criterios de vinculación (Single, Complete y Average). Cada árbol se corta en 2, 3, 4, 5 y 6 grupos y se mide la silueta de cada corte. Cada criterio se queda con su mejor silueta y gana el criterio cuya mejor silueta sea la más alta.</p>
+
+<div class="aviso">
+    <b>Criterio ganador: <span th:text="${resultado.ganador.nombre}"></span></b>
+    · silueta <span th:text="${#numbers.formatDecimal(resultado.ganador.mejorSilueta, 1, 4)}"></span>
+    con <span th:text="${resultado.ganador.mejorGrupos}"></span> grupos
+</div>
 
 <h2>Silueta por criterio y número de grupos</h2>
 <div class="tabla">
@@ -23,23 +27,27 @@
         <th class="n">Mejor k</th>
         <th class="n">Mejor silueta</th>
     </tr>
-    <tr th:each="criterio : ${resultado.criterios}">
-        <td th:text="${criterio.nombre}"></td>
-        <td class="n" th:each="silueta : ${criterio.siluetas}" th:text="${#numbers.formatDecimal(silueta, 1, 4)}"></td>
+    <tr th:each="criterio, posicion : ${resultado.criterios}">
+        <td>
+            <span th:text="${criterio.nombre}"></span>
+            <span class="etiqueta" th:if="${posicion.index == resultado.posicionGanador}">ganador</span>
+        </td>
+        <td class="n" th:each="silueta, estado : ${criterio.siluetas}"
+            th:classappend="${gruposMinimo + estado.index == criterio.mejorGrupos} ? 'mejor-k'"
+            th:text="${#numbers.formatDecimal(silueta, 1, 4)}"></td>
         <td class="n" th:text="${criterio.mejorGrupos}"></td>
-        <td class="n" th:text="${#numbers.formatDecimal(criterio.mejorSilueta, 1, 4)}"></td>
+        <td class="n" th:classappend="${posicion.index == resultado.posicionGanador} ? 'mejor'"
+            th:text="${#numbers.formatDecimal(criterio.mejorSilueta, 1, 4)}"></td>
     </tr>
 </table>
 </div>
+<p class="nota">Cuanto más cerca de 1, más coherentes los grupos. El fondo azul marca el mejor k de cada criterio.</p>
 
-<h2>Criterio ganador</h2>
-<p><b th:text="${resultado.ganador.nombre}"></b> con silueta <span th:text="${#numbers.formatDecimal(resultado.ganador.mejorSilueta, 1, 4)}"></span> y <span th:text="${resultado.ganador.mejorGrupos}"></span> grupos.</p>
-
-<h2>Mejor agrupamiento de cada criterio</h2>
-<p th:each="criterio, posicion : ${resultado.criterios}">
-    <span th:text="${criterio.nombre} + ': ' + ${criterio.mejorGrupos} + ' grupos'"></span>
-    <a th:href="@{/clustering/dendrograma/{posicion}(posicion=${posicion.index})}">Ver dendrograma</a>
-</p>
+<h2>Dendrogramas</h2>
+<div class="fila-enlace" th:each="criterio, posicion : ${resultado.criterios}">
+    <span th:text="${criterio.nombre} + ' · ' + ${criterio.mejorGrupos} + ' grupos'"></span>
+    <a class="boton-sec" th:href="@{/clustering/dendrograma/{posicion}(posicion=${posicion.index})}">Ver dendrograma</a>
+</div>
 </main>
 </body>
 </html>

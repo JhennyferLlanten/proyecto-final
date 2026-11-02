@@ -44,6 +44,8 @@ public class ControladorClustering {
         double minimoAmpliado = Dendrograma.calcularMinimoAmpliado(criterio.uniones);
 
         modelo.addAttribute("criterio", criterio);
+        modelo.addAttribute("criterios", resultado.criterios);
+        modelo.addAttribute("posicion", posicion);
         modelo.addAttribute("minimoAmpliado", minimoAmpliado);
         modelo.addAttribute("colores", Dendrograma.COLORES);
         modelo.addAttribute("figuraCompleta", Dendrograma.dibujar(criterio.uniones, articulos, alturaCorte,

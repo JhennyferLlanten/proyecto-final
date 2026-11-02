@@ -9,31 +9,37 @@
 <body>
 <nav th:replace="~{fragmentos :: barra('clustering')}"></nav>
 <main>
-<p><a href="/clustering">Volver a clustering</a></p>
+<p><a class="boton-sec" href="/clustering">← Volver a clustering</a></p>
 <h1 th:text="'Dendrograma de ' + ${criterio.nombre}"></h1>
-<p>Cada abstract es una hoja. Cada línea horizontal une dos grupos a la distancia a la que se unieron.</p>
-<p>La línea roja es el corte con el mejor número de grupos de este criterio: <b th:text="${criterio.mejorGrupos}"></b> grupos, con silueta <span th:text="${#numbers.formatDecimal(criterio.mejorSilueta, 1, 4)}"></span>.</p>
+<p>Cada abstract es una hoja. Cada línea horizontal une dos grupos a la distancia a la que se unieron. La línea roja es el corte con el mejor número de grupos de este criterio.</p>
+
+<div class="selector">
+    <a th:each="opcion, estado : ${criterios}" th:href="@{/clustering/dendrograma/{posicion}(posicion=${estado.index})}"
+       th:classappend="${estado.index == posicion} ? 'activo'" th:text="${opcion.nombre}"></a>
+</div>
+
+<div class="metricas">
+    <div class="metrica"><small>Grupos del corte</small><b th:text="${criterio.mejorGrupos}"></b></div>
+    <div class="metrica"><small>Silueta</small><b th:text="${#numbers.formatDecimal(criterio.mejorSilueta, 1, 4)}"></b></div>
+</div>
 
 <h2>Grupos del corte</h2>
-<ul>
-    <li th:each="grupo, estado : ${criterio.gruposMejorCorte}" th:style="'color:' + ${colores[estado.index]}">
-        <b th:text="'Grupo ' + ${estado.count} + ': ' + ${grupo}"></b>
-    </li>
-</ul>
+<div class="grupo" th:each="grupo, estado : ${criterio.gruposMejorCorte}">
+    <span class="punto" th:style="'background:' + ${colores[estado.index]}"></span>
+    <b th:text="'Grupo ' + ${estado.count} + ':'"></b>
+    <span th:text="${grupo}"></span>
+</div>
 
 <h2>Dendrograma</h2>
-
-<div class="tabla">
-<table class="figuras">
-    <tr>
-        <td><b>Escala de 0 a 1</b></td>
-        <td><b th:text="'Escala ampliada de ' + ${#numbers.formatDecimal(minimoAmpliado, 1, 2)} + ' a 1,00'"></b></td>
-    </tr>
-    <tr>
-        <td th:utext="${figuraCompleta}"></td>
-        <td th:utext="${figuraAmpliada}"></td>
-    </tr>
-</table>
+<div class="figuras">
+    <div class="figura">
+        <p>Escala de 0 a 1</p>
+        <div th:utext="${figuraCompleta}"></div>
+    </div>
+    <div class="figura">
+        <p th:text="'Escala ampliada de ' + ${#numbers.formatDecimal(minimoAmpliado, 1, 2)} + ' a 1,00'"></p>
+        <div th:utext="${figuraAmpliada}"></div>
+    </div>
 </div>
 </main>
 </body>
