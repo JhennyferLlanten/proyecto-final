@@ -2,6 +2,7 @@ package co.edu.uniquindio.pruebas;
 
 import co.edu.uniquindio.clustering.Agrupamiento;
 import co.edu.uniquindio.clustering.MatrizDistancias;
+import co.edu.uniquindio.clustering.Silueta;
 import co.edu.uniquindio.clustering.Union;
 import co.edu.uniquindio.modelo.Articulo;
 import co.edu.uniquindio.modelo.LectorDatos;
@@ -20,7 +21,7 @@ public class CasoEstudioClustering {
         double[][] similitud = modelo.calcularMatriz();
         double[][] distancias = MatrizDistancias.calcularMatrizDistancia(similitud);
 
-        System.out.println("===== PASO 1: MATRIZ DE DISTANCIAS =====");
+        System.out.println("===== MATRIZ DE DISTANCIAS =====");
         System.out.println("Tamano de la matriz: " + distancias.length + " x " + distancias[0].length);
         System.out.println();
 
@@ -82,7 +83,7 @@ public class CasoEstudioClustering {
             Union union = uniones[numeroUnion];
             System.out.println("Union " + (numeroUnion + 1) + ": " + nombreGrupo(union.grupoIzquierdo, articulos)
                     + " + " + nombreGrupo(union.grupoDerecho, articulos)
-                    + " | altura = " + formato(union.altura)
+                    + " | distancia = " + formato(union.altura)
                     + " | tamano = " + union.tamano
                     + " | nuevo grupo = G" + (articulos.length + numeroUnion));
             if (numeroUnion > 0 && union.altura < uniones[numeroUnion - 1].altura) {
@@ -90,6 +91,40 @@ public class CasoEstudioClustering {
             }
         }
         System.out.println("Alturas de menor a mayor: " + alturasOrdenadas);
+        mostrarCortes(uniones, articulos, distancias);
+    }
+
+    private static void mostrarCortes(Union[] uniones, Articulo[] articulos, double[][] distancias) {
+        int total = articulos.length;
+        double mejorSilueta = -2;
+        int mejorGrupos = 0;
+        for (int numeroGrupos = 2; numeroGrupos <= 6; numeroGrupos++) {
+            int[] etiquetas = Agrupamiento.cortarArbol(uniones, total, numeroGrupos);
+            System.out.println();
+            System.out.println("Corte con k = " + numeroGrupos);
+            int suma = 0;
+            for (int grupo = 0; grupo < numeroGrupos; grupo++) {
+                String miembros = "";
+                int tamano = 0;
+                for (int i = 0; i < total; i++) {
+                    if (etiquetas[i] == grupo) {
+                        miembros = miembros + articulos[i].numero + " ";
+                        tamano++;
+                    }
+                }
+                suma = suma + tamano;
+                System.out.println("  Grupo " + (grupo + 1) + " (" + tamano + "): " + miembros);
+            }
+            System.out.println("  Total de articulos: " + suma);
+            double silueta = Silueta.calcularSilueta(distancias, etiquetas, numeroGrupos);
+            System.out.println("  Silueta = " + formato(silueta));
+            if (silueta > mejorSilueta) {
+                mejorSilueta = silueta;
+                mejorGrupos = numeroGrupos;
+            }
+        }
+        System.out.println();
+        System.out.println("Mejor corte: k = " + mejorGrupos + ", silueta = " + formato(mejorSilueta));
     }
 
     private static String nombreGrupo(int grupo, Articulo[] articulos) {

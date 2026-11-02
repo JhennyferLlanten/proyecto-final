@@ -64,4 +64,34 @@ public class Agrupamiento {
         }
         return (tamanoI * distanciaI + tamanoJ * distanciaJ) / (tamanoI + tamanoJ);
     }
+
+    public static int[] cortarArbol(Union[] uniones, int total, int numeroGrupos) {
+        int[] etiquetas = new int[total];                                                       //una etiqueta por grupo
+        for (int i = 0; i < total; i++) {
+            etiquetas[i] = i;
+        }
+
+        for (int numeroUnion = 0; numeroUnion < total - numeroGrupos; numeroUnion++) {
+            Union union = uniones[numeroUnion];                                                  //lee la union actual
+            for (int i = 0; i < total; i++) {
+                if (etiquetas[i] == union.grupoIzquierdo || etiquetas[i] == union.grupoDerecho) {         //revisa si el articulo pertenece a la union
+                    etiquetas[i] = total + numeroUnion;                                                   //le asigna la etiqueta del grupo actual
+                }
+            }
+        }
+
+        int[] nuevoNumero = new int[2 * total - 1];                                             //crea el arreglo de las etiquetas
+        for (int i = 0; i < nuevoNumero.length; i++) {
+            nuevoNumero[i] = -1;
+        }
+        int contador = 0;
+        for (int i = 0; i < total; i++) {                                                       //reasigna la numeración de los nuevos grupos desde 0
+            if (nuevoNumero[etiquetas[i]] == -1) {
+                nuevoNumero[etiquetas[i]] = contador;
+                contador++;
+            }
+            etiquetas[i] = nuevoNumero[etiquetas[i]];
+        }
+        return etiquetas;
+    }
 }

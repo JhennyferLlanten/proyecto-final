@@ -48,20 +48,6 @@
             <td th:text="${#numbers.formatDecimal(fila.word2vecEuclidiana, 1, 4)}"></td>
         </tr>
     </table>
-
-    <h2>Tiempos (suma de todos los pares)</h2>
-    <table border="1" cellpadding="5">
-        <tr>
-            <th>Algoritmo</th>
-            <th>Preprocesamiento (ms)</th>
-            <th>Cálculo (ms)</th>
-        </tr>
-        <tr th:each="total : ${comparacion.totales}">
-            <td th:text="${total.nombre}"></td>
-            <td th:text="${#numbers.formatDecimal(total.milisegundosPreprocesamiento, 1, 4)}"></td>
-            <td th:text="${#numbers.formatDecimal(total.milisegundosCalculo, 1, 4)}"></td>
-        </tr>
-    </table>
 </div>
 
 <h2>Matriz de similitud (coseno con TF-IDF)</h2>

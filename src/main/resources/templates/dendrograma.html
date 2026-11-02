@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dendrograma</title>
+</head>
+<body>
+<p><a href="/">Inicio</a> | <a href="/clustering">Clustering jerárquico</a></p>
+<h1 th:text="'Dendrograma de ' + ${criterio.nombre}"></h1>
+<p>Cada abstract es una hoja. Cada línea horizontal une dos grupos a la distancia a la que se unieron.</p>
+<p>La línea roja es el corte con el mejor número de grupos de este criterio: <b th:text="${criterio.mejorGrupos}"></b> grupos, con silueta <span th:text="${#numbers.formatDecimal(criterio.mejorSilueta, 1, 4)}"></span>.</p>
+
+<h2>Grupos del corte</h2>
+<ul>
+    <li th:each="grupo, estado : ${criterio.gruposMejorCorte}" th:style="'color:' + ${colores[estado.index]}">
+        <b th:text="'Grupo ' + ${estado.count} + ': ' + ${grupo}"></b>
+    </li>
+</ul>
+
+<h2>Dendrograma</h2>
+
+<table>
+    <tr>
+        <td><b>Escala de 0 a 1</b></td>
+        <td><b th:text="'Escala ampliada de ' + ${#numbers.formatDecimal(minimoAmpliado, 1, 2)} + ' a 1,00'"></b></td>
+    </tr>
+    <tr>
+        <td th:utext="${figuraCompleta}"></td>
+        <td th:utext="${figuraAmpliada}"></td>
+    </tr>
+</table>
+</body>
+</html>
