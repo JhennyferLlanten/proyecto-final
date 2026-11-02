@@ -42,6 +42,17 @@
         .figura svg { width: 100%; height: auto; display: block; }
         @media (max-width: 800px) { .figuras { grid-template-columns: minmax(0, 1fr); } }
         .tabla { overflow-x: auto; }
+        table.matriz { table-layout: fixed; min-width: 900px; font-size: 12px; }
+        table.matriz th, table.matriz td { padding: 6px 2px; text-align: center; }
+        .lista { border: 1px solid #e3e3df; border-radius: 8px; margin-bottom: 12px; }
+        .opcion { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-bottom: 1px solid #e3e3df; cursor: pointer; font-size: 14px; }
+        .opcion:last-child { border-bottom: none; }
+        .opcion:hover { background: #f7f7f5; }
+        .opcion:has(input:checked) { background: #e6f1fb; }
+        .acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 8px; }
+        button.secundario { background: #ffffff; color: #1f1f1e; border: 1px solid #b4b2a9; }
+        button.secundario:hover { background: #f1efe8; }
+        .contador { font-size: 13px; color: #5f5e5a; }
         .buscador { display: flex; gap: 8px; max-width: 520px; }
         .buscador input { flex: 1; }
         .etiqueta { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 10px; font-size: 12px; background: #eaf3de; color: #3b6d11; }

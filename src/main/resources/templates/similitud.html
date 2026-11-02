@@ -13,14 +13,19 @@
 <p>Selecciona dos o más artículos y compara sus abstracts por pares con cuatro algoritmos clásicos y uno basado en inteligencia artificial (Word2Vec, con coseno y con distancia euclidiana). Cada uno da un valor entre 0 y 1 (1 = iguales). Todos usan todas las palabras del abstract, sin quitar palabras vacías.</p>
 
 <form action="/similitud" method="get">
-    <p th:each="articulo : ${articulos}">
-        <label>
+    <div class="lista">
+        <label class="opcion" th:each="articulo : ${articulos}">
             <input type="checkbox" name="articulos" th:value="${articulo.numero}"
                    th:checked="${seleccionados != null and seleccionados.contains(articulo.numero)}">
-            <span th:text="${articulo.numero + ' - ' + articulo.titulo}"></span>
+            <span th:text="${articulo.numero + ' · ' + articulo.titulo}"></span>
         </label>
-    </p>
-    <button type="submit">Comparar</button>
+    </div>
+    <div class="acciones">
+        <button type="submit">Comparar</button>
+        <button type="button" class="secundario" id="seleccionarTodos">Seleccionar todos</button>
+        <button type="button" class="secundario" id="limpiar">Limpiar</button>
+        <span class="contador" id="contador"></span>
+    </div>
 </form>
 
 <p th:if="${mensaje != null}" th:text="${mensaje}"></p>
@@ -44,30 +49,69 @@
         <tr th:each="fila : ${comparacion.filas}">
             <td class="n" th:text="${fila.numeroA}"></td>
             <td class="n" th:text="${fila.numeroB}"></td>
-            <td class="n" th:text="${#numbers.formatDecimal(fila.jaccard, 1, 4)}"></td>
-            <td class="n" th:text="${#numbers.formatDecimal(fila.coseno, 1, 4)}"></td>
-            <td class="n" th:text="${#numbers.formatDecimal(fila.levenshtein, 1, 4)}"></td>
-            <td class="n" th:text="${#numbers.formatDecimal(fila.needlemanWunsch, 1, 4)}"></td>
-            <td class="n" th:text="${#numbers.formatDecimal(fila.word2vec, 1, 4)}"></td>
-            <td class="n" th:text="${#numbers.formatDecimal(fila.word2vecEuclidiana, 1, 4)}"></td>
+            <td class="n" th:style="'background:rgba(24,95,165,' + (${fila.jaccard} * 0.4) + ')'" th:text="${#numbers.formatDecimal(fila.jaccard, 1, 4)}"></td>
+            <td class="n" th:style="'background:rgba(24,95,165,' + (${fila.coseno} * 0.4) + ')'" th:text="${#numbers.formatDecimal(fila.coseno, 1, 4)}"></td>
+            <td class="n" th:style="'background:rgba(24,95,165,' + (${fila.levenshtein} * 0.4) + ')'" th:text="${#numbers.formatDecimal(fila.levenshtein, 1, 4)}"></td>
+            <td class="n" th:style="'background:rgba(24,95,165,' + (${fila.needlemanWunsch} * 0.4) + ')'" th:text="${#numbers.formatDecimal(fila.needlemanWunsch, 1, 4)}"></td>
+            <td class="n" th:style="'background:rgba(24,95,165,' + (${fila.word2vec} * 0.4) + ')'" th:text="${#numbers.formatDecimal(fila.word2vec, 1, 4)}"></td>
+            <td class="n" th:style="'background:rgba(24,95,165,' + (${fila.word2vecEuclidiana} * 0.4) + ')'" th:text="${#numbers.formatDecimal(fila.word2vecEuclidiana, 1, 4)}"></td>
         </tr>
     </table>
     </div>
+    <p class="nota">El fondo es más intenso cuanto más alto es el valor.</p>
 </div>
 
 <h2>Matriz de similitud (coseno con TF-IDF)</h2>
 <div class="tabla">
-<table>
+<table class="matriz">
     <tr>
         <th></th>
         <th class="n" th:each="articulo : ${articulos}" th:text="${articulo.numero}"></th>
     </tr>
     <tr th:each="fila, estado : ${matriz}">
         <th class="n" th:text="${articulos[estado.index].numero}"></th>
-        <td class="n" th:each="valor : ${fila}" th:text="${#numbers.formatDecimal(valor, 1, 4)}"></td>
+        <td class="n" th:each="valor : ${fila}" th:style="'background:rgba(24,95,165,' + (${valor} * 0.4) + ')'" th:text="${#numbers.formatDecimal(valor, 1, 4)}"></td>
     </tr>
 </table>
 </div>
 </main>
+<script>
+    var casillas = document.querySelectorAll('input[name="articulos"]');
+    var contador = document.getElementById('contador');
+
+    function actualizarContador() {
+        var total = 0;
+        for (var i = 0; i < casillas.length; i++) {
+            if (casillas[i].checked) {
+                total++;
+            }
+        }
+        if (total === 1) {
+            contador.textContent = '1 artículo seleccionado';
+        } else {
+            contador.textContent = total + ' artículos seleccionados';
+        }
+    }
+
+    for (var i = 0; i < casillas.length; i++) {
+        casillas[i].addEventListener('change', actualizarContador);
+    }
+
+    document.getElementById('seleccionarTodos').addEventListener('click', function () {
+        for (var i = 0; i < casillas.length; i++) {
+            casillas[i].checked = true;
+        }
+        actualizarContador();
+    });
+
+    document.getElementById('limpiar').addEventListener('click', function () {
+        for (var i = 0; i < casillas.length; i++) {
+            casillas[i].checked = false;
+        }
+        actualizarContador();
+    });
+
+    actualizarContador();
+</script>
 </body>
 </html>
