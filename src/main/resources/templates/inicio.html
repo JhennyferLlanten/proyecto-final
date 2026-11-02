@@ -2,9 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Análisis de algoritmos - Bibliometría</title>
+    <style th:replace="~{fragmentos :: estilos}"></style>
 </head>
 <body>
+<nav th:replace="~{fragmentos :: barra('inicio')}"></nav>
+<main>
 <h1>Análisis de algoritmos en el contexto de la bibliometría</h1>
 <p>Corpus: 20 artículos sobre inteligencia artificial generativa.</p>
 
@@ -16,15 +20,18 @@
 </ul>
 
 <h2>Artículos</h2>
-<table border="1" cellpadding="5">
+<div class="tabla">
+<table>
     <tr>
-        <th>Número</th>
+        <th class="n">Número</th>
         <th>Título</th>
     </tr>
     <tr th:each="articulo : ${articulos}">
-        <td th:text="${articulo.numero}">1</td>
+        <td class="n" th:text="${articulo.numero}">1</td>
         <td th:text="${articulo.titulo}">Título</td>
     </tr>
 </table>
+</div>
+</main>
 </body>
 </html>
