@@ -28,7 +28,15 @@ public class ControladorPatrones {
             ResultadoAlgoritmo rabinKarp = EjecutorBusqueda.ejecutarRabinKarp(textos, patronMinuscula);
 
             ResultadoAlgoritmo[] resultados = {kmp, boyerMoore, rabinKarp};
+            ResultadoAlgoritmo masRapido = resultados[0];
+            for (int i = 1; i < resultados.length; i++) {
+                if (resultados[i].milisegundosBusqueda < masRapido.milisegundosBusqueda) {
+                    masRapido = resultados[i];
+                }
+            }
             modelo.addAttribute("resultados", resultados);
+            modelo.addAttribute("masRapido", masRapido.nombre);
+            modelo.addAttribute("totalArticulos", articulos.length);
             modelo.addAttribute("filas", EjecutorBusqueda.armarFilas(articulos, kmp, boyerMoore, rabinKarp));
         }
         return "patrones";

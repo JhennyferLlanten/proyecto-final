@@ -12,7 +12,7 @@
 <h1>Búsqueda de patrones</h1>
 <p>Busca un texto exacto dentro de los 20 abstracts con KMP, Boyer-Moore y Rabin-Karp (sin distinguir mayúsculas).</p>
 
-<form action="/patrones" method="get">
+<form class="buscador" action="/patrones" method="get">
     <input type="text" name="patron" th:value="${patron}" placeholder="Ejemplo: generative" required>
     <button type="submit">Buscar</button>
 </form>
@@ -30,9 +30,12 @@
             <th class="n">Colisiones</th>
         </tr>
         <tr th:each="resultado : ${resultados}">
-            <td th:text="${resultado.nombre}"></td>
+            <td>
+                <span th:text="${resultado.nombre}"></span>
+                <span class="etiqueta" th:if="${resultado.nombre == masRapido}">menor tiempo de búsqueda</span>
+            </td>
             <td class="n" th:text="${#numbers.formatDecimal(resultado.milisegundosPreprocesamiento, 1, 4)}"></td>
-            <td class="n" th:text="${#numbers.formatDecimal(resultado.milisegundosBusqueda, 1, 4)}"></td>
+            <td class="n" th:classappend="${resultado.nombre == masRapido} ? 'mejor'" th:text="${#numbers.formatDecimal(resultado.milisegundosBusqueda, 1, 4)}"></td>
             <td class="n" th:text="${resultado.totalOcurrencias}"></td>
             <td class="n" th:text="${resultado.totalComparaciones}"></td>
             <td class="n" th:text="${resultado.totalColisiones}"></td>
@@ -42,6 +45,7 @@
 
     <h2>Artículos donde aparece</h2>
     <p th:if="${filas.isEmpty()}">El patrón no aparece en ningún abstract.</p>
+    <p th:if="${!filas.isEmpty()}" th:text="'Aparece en ' + ${filas.size()} + ' de ' + ${totalArticulos} + ' artículos.'"></p>
     <div class="tabla" th:if="${!filas.isEmpty()}">
     <table>
         <tr>
